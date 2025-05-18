@@ -52,16 +52,15 @@ export const assignTrainsWithMinHeap = (
 
   const formatTime = (date: Date) => date.toTimeString().slice(0, 5); // returns "HH:MM"
 
-  const sortedTrains = [...trains].sort((a, b) => {
-    const pa = priorityMap[a.priority];
-    const pb = priorityMap[b.priority];
-    if (pa !== pb) return pa - pb;
-    // If same priority, sort by scheduledArrival
-    return (
-      parseTime(a.scheduledArrival).getTime() -
-      parseTime(b.scheduledArrival).getTime()
-    );
-  });
+  const sortedTrains = [...trains]
+    .map((train, index) => ({ train, index }))
+    .sort((a, b) => {
+      const pa = priorityMap[a.train.priority];
+      const pb = priorityMap[b.train.priority];
+      if (pa !== pb) return pa - pb;
+      return a.index - b.index;
+    })
+    .map(({ train }) => train);
 
   const heap = new MinHeap<Platform>(
     (a, b) => a.nextAvailable.getTime() - b.nextAvailable.getTime()
