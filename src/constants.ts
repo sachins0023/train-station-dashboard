@@ -12,17 +12,6 @@ export const TRAIN_CSV_HEADERS = [
   "Priority",
 ];
 
-export const TRAIN_TABLE_HEADERS = [
-  "Train Number",
-  "Priority",
-  "Scheduled Arrival",
-  "Actual Arrival",
-  "Scheduled Departure",
-  "Actual Departure",
-  "Platform",
-  "Status",
-];
-
 export const TABLE_HEADERS_KEY_MAP = {
   "Train Number": "trainNumber",
   Priority: "priority",
@@ -33,3 +22,9 @@ export const TABLE_HEADERS_KEY_MAP = {
   Platform: "platformId",
   Status: "status",
 };
+
+export const TRAIN_TABLE_HEADERS = Object.keys(TABLE_HEADERS_KEY_MAP);
+
+export const TABLE_KEY_HEADERS_MAP = Object.fromEntries(
+  Object.entries(TABLE_HEADERS_KEY_MAP).map(([key, value]) => [value, key])
+);

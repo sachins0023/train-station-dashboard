@@ -1,5 +1,6 @@
 import type { TrainCSV } from "@/types";
 import { Input } from "./ui/input";
+import { TABLE_KEY_HEADERS_MAP } from "@/constants";
 
 const Upload = ({ onUpload }: { onUpload: (data: TrainCSV[]) => void }) => {
   const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,12 +22,15 @@ const Upload = ({ onUpload }: { onUpload: (data: TrainCSV[]) => void }) => {
         }, {} as Record<string, string>);
       });
 
-      const trainData = data.map((train) => ({
-        trainNumber: train["Train Number"],
-        scheduledArrival: train["Arrival Time"],
-        scheduledDeparture: train["Departure Time"],
-        priority: train["Priority"],
-      }));
+      const trainData = data
+        .map((train) =>
+          Object.entries(TABLE_KEY_HEADERS_MAP).reduce((acc, [key, value]) => {
+            acc[key] = train[value];
+
+            return acc;
+          }, {} as Record<string, string>)
+        )
+        .filter((train) => !!train.trainNumber);
 
       onUpload(trainData as unknown as TrainCSV[]);
     };
