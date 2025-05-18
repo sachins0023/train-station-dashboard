@@ -26,7 +26,7 @@ const TrainSideView = ({
           {trainNumber}
         </div>
         <img
-          src={"/public/train-side-view.svg"}
+          src="train-side-view.svg"
           alt={trainNumber}
           className="w-10 h-10"
         />
@@ -48,16 +48,9 @@ const Platform = ({
   const currentTrains = trains.filter((train) => train.status === "arrived");
   const upcomingTrains = trains.filter((train) => train.status === "scheduled");
 
-  const currentTrainDepartingTime =
-    currentTrains[0]?.actualDeparture || currentTrains[0]?.scheduledDeparture;
-
-  const delayedTrains = currentTrainDepartingTime
-    ? upcomingTrains.filter(
-        (train) => isLate(train.scheduledArrival, currentTrainDepartingTime)
-        // &&
-        // currentTime > train.scheduledArrival
-      )
-    : [];
+  const delayedTrains = upcomingTrains.filter((train) =>
+    isLate(train.scheduledArrival, currentTime)
+  );
 
   const currentTrainVariants = {
     initial: { opacity: 0, x: -50 },
