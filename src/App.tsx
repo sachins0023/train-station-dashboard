@@ -4,10 +4,9 @@ import type { Train, TrainCSV } from "@/types";
 import LandingPage from "./pages/LandingPage";
 import TrainDashboard from "./pages/TrainDashboard";
 import { errorMessage } from "./utils";
-import { setPlatformData, updateClock } from "./actions";
+import { resetState, setPlatformData } from "./actions";
 import { X } from "lucide-react";
 import { TrainProvider, useTrainContext } from "./context/TrainContext";
-import { INITIAL_CLOCK_TIME } from "./constants";
 import { assignTrainsWithMinHeap } from "@/utils";
 
 function TrainApp() {
@@ -21,28 +20,30 @@ function TrainApp() {
   }, [state.platformData]);
 
   const onUpload = useCallback((data: TrainCSV[]) => {
-    // Format and validate train data
-    const updatedData = data.map((train: TrainCSV) => {
-      // Validate required fields
-      if (
+    const hasError = data.some(
+      (train) =>
         !train.trainNumber ||
         !train.scheduledArrival ||
         !train.scheduledDeparture ||
         !train.priority
-      ) {
-        throw new Error(
-          `Invalid train data for train ${train.trainNumber || "unknown"}`
-        );
-      }
+    );
+    if (hasError) {
+      errorMessage(
+        "Invalid train data. Please check the uploaded excel! Download the template to see the expected format."
+      );
+      return;
+    }
 
-      return {
-        ...train,
-        actualArrival: train.scheduledArrival,
-        actualDeparture: train.scheduledDeparture,
-        status: "scheduled" as const,
-        platformId: "0", // Will be set by assignTrainsWithMinHeap
-      } as Train;
-    });
+    const updatedData = data.map(
+      (train: TrainCSV) =>
+        ({
+          ...train,
+          actualArrival: train.scheduledArrival,
+          actualDeparture: train.scheduledDeparture,
+          status: "scheduled" as const,
+          platformId: "0", // Will be set by assignTrainsWithMinHeap
+        } as Train)
+    );
 
     setUploadedFileData(updatedData);
   }, []);
@@ -100,9 +101,9 @@ function TrainApp() {
 
   const reset = useCallback(() => {
     setPlatformCount("");
+    setUploadedFileData([]);
     setShowDashboard(false);
-    dispatch(setPlatformData([], 0, "00:00", "23:59"));
-    dispatch(updateClock(INITIAL_CLOCK_TIME));
+    dispatch(resetState());
   }, [dispatch]);
 
   return (

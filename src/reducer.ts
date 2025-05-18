@@ -2,12 +2,14 @@ import {
   SET_PLATFORM_DATA,
   UPDATE_TRAIN_STATUS,
   UPDATE_CLOCK,
+  RESET_STATE,
+  INITIAL_CLOCK_TIME,
 } from "./constants";
 import type { Train, TrainAction, TrainState } from "./types";
 
 const initialState: TrainState = {
   platformData: {},
-  clockTime: "10:00",
+  clockTime: INITIAL_CLOCK_TIME,
 };
 
 export const trainReducer = (
@@ -53,6 +55,8 @@ export const trainReducer = (
         ...state,
         clockTime: action.payload,
       };
+    case RESET_STATE:
+      return initialState;
     default:
       return state;
   }

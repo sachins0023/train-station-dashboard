@@ -33,7 +33,8 @@ export type TrainAction =
       type: "UPDATE_TRAIN_STATUS";
       payload: { trainNumber: string; status: Status; platformId: string }[];
     }
-  | { type: "UPDATE_CLOCK"; payload: string };
+  | { type: "UPDATE_CLOCK"; payload: string }
+  | { type: "RESET_STATE" };
 
 export interface TrainState {
   platformData: Record<string, Train[]>;

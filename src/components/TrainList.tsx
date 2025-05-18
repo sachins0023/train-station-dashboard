@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Train } from "@/types";
 import { TrainListCard } from "./TrainListCard";
 import { isLate } from "@/utils";
@@ -20,17 +19,12 @@ const TrainList = ({ data }: { data: Train[] }) => {
       isLate(train.scheduledArrival, currentTime)
   );
   return (
-    <Card className="flex-4 h-full overflow-y-auto">
-      <CardHeader>
-        <CardTitle>Train List</CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">
-        <TrainListCard title="Upcoming Trains" trains={upcomingTrains} />
-        <TrainListCard title="Waiting Trains" trains={delayedTrains} />
-        <TrainListCard title="Trains on Platform" trains={trainsOnPlatform} />
-        <TrainListCard title="Departed Trains" trains={departedTrains} />
-      </CardContent>
-    </Card>
+    <div className="flex-4 h-full overflow-y-auto gap-4 flex flex-col">
+      <TrainListCard title="Upcoming Trains" trains={upcomingTrains} />
+      <TrainListCard title="Waiting Trains" trains={delayedTrains} />
+      <TrainListCard title="Trains on Platform" trains={trainsOnPlatform} />
+      <TrainListCard title="Departed Trains" trains={departedTrains} />
+    </div>
   );
 };
 

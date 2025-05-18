@@ -4,6 +4,7 @@ export const INITIAL_CLOCK_TIME = "08:00";
 export const SET_PLATFORM_DATA = "SET_PLATFORM_DATA";
 export const UPDATE_TRAIN_STATUS = "UPDATE_TRAIN_STATUS";
 export const UPDATE_CLOCK = "UPDATE_CLOCK";
+export const RESET_STATE = "RESET_STATE";
 
 export const TRAIN_CSV_HEADERS = [
   "Train Number",

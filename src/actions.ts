@@ -1,4 +1,5 @@
 import {
+  RESET_STATE,
   SET_PLATFORM_DATA,
   UPDATE_CLOCK,
   UPDATE_TRAIN_STATUS,
@@ -51,3 +52,5 @@ export const updateClock = (time: string): TrainAction => ({
   type: UPDATE_CLOCK,
   payload: time,
 });
+
+export const resetState = (): TrainAction => ({ type: RESET_STATE });
