@@ -24,7 +24,6 @@ function TrainApp() {
     // Format and validate train data
     const updatedData = data.map((train: TrainCSV) => {
       // Validate required fields
-      console.log({ train, data });
       if (
         !train.trainNumber ||
         !train.scheduledArrival ||

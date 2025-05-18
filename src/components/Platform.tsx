@@ -4,7 +4,8 @@ import { isLate } from "@/utils";
 import Status from "./Status";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
-// import { useTrainContext } from "@/context/TrainContext";
+import { useTrainContext } from "@/context/TrainContext";
+import { differenceInMinutes, parseTime } from "@/utils";
 
 const TrainSideView = ({
   trainNumber,
@@ -14,20 +15,22 @@ const TrainSideView = ({
   isLate: boolean;
 }) => {
   return (
-    <div className="flex items-center">
-      <div
-        className={cn(
-          "rounded-md rounded-r-none px-4",
-          isLate ? "bg-red-200" : "bg-blue-200"
-        )}
-      >
-        {trainNumber}
+    <div className="flex flex-col">
+      <div className="flex items-center">
+        <div
+          className={cn(
+            "rounded-md rounded-r-none px-4",
+            isLate ? "bg-red-200" : "bg-blue-200"
+          )}
+        >
+          {trainNumber}
+        </div>
+        <img
+          src={"/public/train-side-view.svg"}
+          alt={trainNumber}
+          className="w-10 h-10"
+        />
       </div>
-      <img
-        src={"/public/train-side-view.svg"}
-        alt={trainNumber}
-        className="w-10 h-10"
-      />
     </div>
   );
 };
@@ -39,8 +42,8 @@ const Platform = ({
   platformId: string;
   trains: Train[];
 }) => {
-  // const { state } = useTrainContext();
-  // const currentTime = state?.clockTime;
+  const { state } = useTrainContext();
+  const currentTime = state?.clockTime;
 
   const currentTrains = trains.filter((train) => train.status === "arrived");
   const upcomingTrains = trains.filter((train) => train.status === "scheduled");
@@ -83,6 +86,10 @@ const Platform = ({
                 train.scheduledArrival,
                 train.actualArrival
               );
+              const remainingTime = differenceInMinutes(
+                parseTime(currentTime),
+                parseTime(train.actualDeparture)
+              );
               return (
                 <motion.div
                   key={train.trainNumber}
@@ -91,35 +98,51 @@ const Platform = ({
                   animate="animate"
                   exit="exit"
                   transition={{ duration: 1 }}
-                  className="flex items-center gap-2"
+                  className="flex flex-col gap-2"
                 >
-                  <TrainSideView
-                    trainNumber={train.trainNumber}
-                    isLate={isTrainLate}
-                  />
-                  <Status status={train.status} isLate={isTrainLate} />
+                  <div className="flex items-center gap-2">
+                    <TrainSideView
+                      trainNumber={train.trainNumber}
+                      isLate={isTrainLate}
+                    />
+                    <Status status={train.status} isLate={isTrainLate} />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Leaving in {remainingTime} mins
+                  </p>
                 </motion.div>
               );
             })}
           </AnimatePresence>
           {delayedTrains.length > 0 && (
-            <p className="text-sm text-muted-foreground">Delayed</p>
+            <p className="text-sm text-red-500 font-bold">Delayed Trains</p>
           )}
           <AnimatePresence mode="popLayout">
-            {delayedTrains.map((train) => (
-              <motion.div
-                key={train.trainNumber}
-                variants={delayedTrainVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={{ duration: 1 }}
-                className="flex items-center gap-2"
-              >
-                <TrainSideView trainNumber={train.trainNumber} isLate />
-                <Status status={train.status} isLate={true} />
-              </motion.div>
-            ))}
+            {delayedTrains.map((train) => {
+              const remainingTime = differenceInMinutes(
+                parseTime(currentTime),
+                parseTime(train.actualDeparture)
+              );
+              return (
+                <motion.div
+                  key={train.trainNumber}
+                  variants={delayedTrainVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ duration: 1 }}
+                  className="flex flex-col"
+                >
+                  <div className="flex items-center gap-2">
+                    <TrainSideView trainNumber={train.trainNumber} isLate />
+                    <Status status={train.status} isLate={true} />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Leaving in {remainingTime} mins
+                  </p>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
           {!allTrains.length && (
             <p className="text-sm text-muted-foreground">

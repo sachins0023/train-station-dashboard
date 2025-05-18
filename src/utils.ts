@@ -39,16 +39,16 @@ export const infoMessage = (
   action?: { label: string; onClick: () => void }
 ) => toast.info(message, { action });
 
+export const parseTime = (t: string) => {
+  const [h, m] = t.split(":").map(Number);
+  return new Date(2000, 0, 1, h, m);
+};
+
 export const assignTrainsWithMinHeap = (
   trains: Train[],
   platformCount: number
 ): Record<number, Train[]> => {
   const priorityMap = { P1: 1, P2: 2, P3: 3 };
-
-  const parseTime = (t: string) => {
-    const [h, m] = t.split(":").map(Number);
-    return new Date(2000, 0, 1, h, m);
-  };
 
   const formatTime = (date: Date) => date.toTimeString().slice(0, 5); // returns "HH:MM"
 
@@ -121,7 +121,6 @@ export const assignTrainsWithMinHeap = (
 };
 
 export const isLate = (scheduled: string, actual: string): boolean => {
-  console.log({ scheduled, actual });
   // Convert HH:MM to minutes since midnight for easier comparison
   const [scheduledHours, scheduledMinutes] = scheduled.split(":").map(Number);
   const [actualHours, actualMinutes] = actual.split(":").map(Number);
@@ -131,4 +130,8 @@ export const isLate = (scheduled: string, actual: string): boolean => {
 
   const diff = actualTotalMinutes - scheduledTotalMinutes; // Changed order of subtraction
   return diff > 0;
+};
+
+export const differenceInMinutes = (date1: Date, date2: Date): number => {
+  return Math.round((date2.getTime() - date1.getTime()) / 60000);
 };
