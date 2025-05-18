@@ -1,4 +1,4 @@
-import { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect, useMemo } from "react";
 import { Toaster } from "sonner";
 import useClock from "@/hooks/useClock";
 import type { Train, TrainCSV } from "@/types";
@@ -7,15 +7,19 @@ import TrainDashboard from "./pages/TrainDashboard";
 import { errorMessage } from "./utils";
 import { trainReducer } from "./reducer";
 import useTrainEvents from "./hooks/useTrainEvents";
-import { setTrains, updateTrainStatus } from "./actions";
+import { setPlatformData, updateTrainStatus } from "./actions";
 
 function App() {
   const [platformCount, setPlatformCount] = useState<string>("");
   const [showDashboard, setShowDashboard] = useState<boolean>(false);
 
-  const [trainData, dispatch] = useReducer(trainReducer, []);
+  const [platformData, dispatch] = useReducer(trainReducer, {});
 
-  const { currentEvents, processedEventsRef, platformData } = useTrainEvents(
+  const trainData = useMemo(() => {
+    return Object.values(platformData).flat();
+  }, [platformData]);
+
+  const { currentEvents, processedEventsRef } = useTrainEvents(
     trainData,
     platformCount
   );
@@ -41,15 +45,59 @@ function App() {
     }
   }, [time, currentEvents, processedEventsRef]);
 
-  const onUpload = useCallback((data: TrainCSV[]) => {
-    const updatedData = data.map((train: TrainCSV) => ({
-      ...train,
-      actualArrival: train.scheduledArrival,
-      actualDeparture: train.scheduledDeparture,
-      status: "scheduled",
-    })) as Train[];
-    dispatch(setTrains(updatedData));
-  }, []);
+  const onUpload = useCallback(
+    (data: TrainCSV[]) => {
+      if (!platformCount) {
+        errorMessage("Please enter platform count first");
+        return;
+      }
+
+      const platformCountNum = Number(platformCount);
+      if (isNaN(platformCountNum) || platformCountNum <= 0) {
+        errorMessage("Please enter a valid platform count");
+        return;
+      }
+
+      if (!data.length) {
+        errorMessage("No train data provided");
+        return;
+      }
+
+      // Format and validate train data
+      const updatedData = data.map((train: TrainCSV) => {
+        // Validate required fields
+        if (
+          !train.trainNumber ||
+          !train.scheduledArrival ||
+          !train.scheduledDeparture ||
+          !train.priority
+        ) {
+          throw new Error(
+            `Invalid train data for train ${train.trainNumber || "unknown"}`
+          );
+        }
+
+        return {
+          ...train,
+          actualArrival: train.scheduledArrival,
+          actualDeparture: train.scheduledDeparture,
+          status: "scheduled" as const,
+          platformId: "0", // Will be set by assignTrainsWithMinHeap
+        } as Train;
+      });
+
+      try {
+        dispatch(setPlatformData(updatedData, platformCountNum));
+      } catch (error) {
+        errorMessage(
+          `Failed to assign platforms: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
+      }
+    },
+    [platformCount]
+  );
 
   const onSubmit = useCallback(() => {
     if (!platformCount) {

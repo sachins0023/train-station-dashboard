@@ -2,21 +2,17 @@ import type { Train } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import Platform from "./Platform";
 
-const PlatformList = ({ data }: { data: Record<number, Train[]> }) => {
+const PlatformList = ({ data }: { data: Record<string, Train[]> }) => {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Platform List</CardTitle>
-        {/* <CardDescription>Card Description</CardDescription> */}
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-4">
         {Object.entries(data).map(([platformId, trains]) => (
           <Platform key={platformId} platformId={platformId} trains={trains} />
         ))}
       </CardContent>
-      {/* <CardFooter>
-    <p>Card Footer</p>
-  </CardFooter> */}
     </Card>
   );
 };

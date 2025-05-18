@@ -1,5 +1,8 @@
 import type { Train } from "@/types";
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
+import { isLate } from "@/utils";
+import Status from "./Status";
+import { motion, AnimatePresence } from "motion/react";
 
 const Platform = ({
   platformId,
@@ -8,17 +11,55 @@ const Platform = ({
   platformId: string;
   trains: Train[];
 }) => {
+  const currentTrains = trains.filter((train) => train.status === "arrived");
+  const upcomingTrains = trains.filter((train) => train.status === "scheduled");
+
+  const currentTrainDepartingTime =
+    currentTrains[0]?.actualDeparture || currentTrains[0]?.scheduledDeparture;
+
+  const delayedTrains = currentTrainDepartingTime
+    ? upcomingTrains.filter((train) =>
+        isLate(train.scheduledArrival, currentTrainDepartingTime)
+      )
+    : [];
+
+  const trainVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
+  };
+
+  const allTrains = [...currentTrains, ...delayedTrains];
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Platform {platformId}</CardTitle>
       </CardHeader>
       <CardContent>
-        {trains.map((train) => (
-          <p key={train.trainNumber}>
-            {train.trainNumber} {train.status}
-          </p>
-        ))}
+        <div className="flex flex-col gap-2">
+          <AnimatePresence mode="popLayout">
+            {allTrains.map((train) => (
+              <motion.div
+                key={train.trainNumber}
+                variants={trainVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.5 }}
+                className="flex items-center gap-2"
+              >
+                {train.trainNumber}{" "}
+                <Status status={train.status} isLate={true} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          {!allTrains.length && (
+            <p className="text-sm text-muted-foreground">
+              No trains on platform
+            </p>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

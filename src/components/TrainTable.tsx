@@ -1,4 +1,4 @@
-import type { Train } from "@/types";
+import type { Status as StatusType, Train } from "@/types";
 import {
   Table,
   TableHeader,
@@ -7,10 +7,53 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import { TRAIN_TABLE_HEADERS } from "@/constants";
+import { TABLE_HEADERS_KEY_MAP, TRAIN_TABLE_HEADERS } from "@/constants";
+import { cn } from "@/lib/utils";
+import { isLate } from "@/utils";
+import Status from "./Status";
 
-const StyledTableCell = ({ children }: { children: React.ReactNode }) => {
-  return <TableCell className="text-center">{children}</TableCell>;
+const StyledTableCell = ({
+  train,
+  header,
+}: {
+  train: Train;
+  header: string;
+}) => {
+  const key = TABLE_HEADERS_KEY_MAP[
+    header as keyof typeof TABLE_HEADERS_KEY_MAP
+  ] as keyof Train;
+  const value = train[key] || "N/A";
+  const isArrivingLate = isLate(train.scheduledArrival, train.actualArrival);
+  const isDepartingLate = isLate(
+    train.scheduledDeparture,
+    train.actualDeparture
+  );
+  const arrivalColor =
+    key === "actualArrival"
+      ? isArrivingLate
+        ? "bg-red-50"
+        : "bg-green-50"
+      : "";
+  const departureColor =
+    key === "actualDeparture"
+      ? isDepartingLate
+        ? "bg-red-50"
+        : "bg-green-50"
+      : "";
+  return (
+    <TableCell
+      className={cn("text-center border", arrivalColor, departureColor)}
+    >
+      {key === "status" ? (
+        <Status
+          status={value as StatusType}
+          isLate={isArrivingLate || isDepartingLate}
+        />
+      ) : (
+        value
+      )}
+    </TableCell>
+  );
 };
 
 const EmptyTrainList = () => {
@@ -30,20 +73,18 @@ const TrainTable = ({ trains }: { trains: Train[] }) => {
     <Table>
       <TableHeader>
         {TRAIN_TABLE_HEADERS.map((header) => (
-          <TableHead key={header}>{header}</TableHead>
+          <TableHead key={header} className="text-center border">
+            {header}
+          </TableHead>
         ))}
       </TableHeader>
       <TableBody className="w-full h-full">
         {trains.length ? (
           trains.map((train) => (
             <TableRow key={train.trainNumber}>
-              <StyledTableCell>{train.trainNumber}</StyledTableCell>
-              <StyledTableCell>{train.scheduledArrival}</StyledTableCell>
-              <StyledTableCell>{train.actualArrival}</StyledTableCell>
-              <StyledTableCell>{train.scheduledDeparture}</StyledTableCell>
-              <StyledTableCell>{train.actualDeparture}</StyledTableCell>
-              <StyledTableCell>{train.platformId}</StyledTableCell>
-              <StyledTableCell>{train.status}</StyledTableCell>
+              {TRAIN_TABLE_HEADERS.map((header) => (
+                <StyledTableCell key={header} header={header} train={train} />
+              ))}
             </TableRow>
           ))
         ) : (

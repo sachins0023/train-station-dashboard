@@ -14,7 +14,7 @@ export const TrainListCard = ({
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-0 border">
         <TrainTable trains={trains} />
       </CardContent>
     </Card>

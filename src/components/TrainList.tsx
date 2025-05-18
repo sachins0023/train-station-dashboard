@@ -3,8 +3,9 @@ import type { Train } from "@/types";
 import { TrainListCard } from "./TrainListCard";
 
 const TrainList = ({ data }: { data: Train[] }) => {
-  const upcomingTrains = data.filter((train) => train.status !== "departed");
-  const pastTrains = data.filter((train) => train.status === "departed");
+  const upcomingTrains = data.filter((train) => train.status === "scheduled");
+  const trainsOnPlatform = data.filter((train) => train.status === "arrived");
+  const departedTrains = data.filter((train) => train.status === "departed");
   return (
     <Card>
       <CardHeader>
@@ -12,7 +13,8 @@ const TrainList = ({ data }: { data: Train[] }) => {
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <TrainListCard title="Upcoming Trains" trains={upcomingTrains} />
-        <TrainListCard title="Past Trains" trains={pastTrains} />
+        <TrainListCard title="Trains on Platform" trains={trainsOnPlatform} />
+        <TrainListCard title="Departed Trains" trains={departedTrains} />
       </CardContent>
     </Card>
   );

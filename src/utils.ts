@@ -114,3 +114,16 @@ export const assignTrainsWithMinHeap = (
 
   return result;
 };
+
+export const isLate = (scheduled: string, actual: string): boolean => {
+  console.log({ scheduled, actual });
+  // Convert HH:MM to minutes since midnight for easier comparison
+  const [scheduledHours, scheduledMinutes] = scheduled.split(":").map(Number);
+  const [actualHours, actualMinutes] = actual.split(":").map(Number);
+
+  const scheduledTotalMinutes = scheduledHours * 60 + scheduledMinutes;
+  const actualTotalMinutes = actualHours * 60 + actualMinutes;
+
+  const diff = actualTotalMinutes - scheduledTotalMinutes; // Changed order of subtraction
+  return diff > 0;
+};

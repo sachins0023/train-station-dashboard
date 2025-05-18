@@ -13,18 +13,18 @@ export interface Train extends TrainCSV {
   actualArrival: string;
   actualDeparture: string;
   status: Status;
-  platformId: number;
+  platformId: string;
 }
 
 export interface Platform {
-  platformId: number;
+  platformId: string;
   nextAvailable: Date;
   queue: Train[];
 }
 
 export type TrainAction =
-  | { type: "SET_TRAINS"; payload: Train[] }
+  | { type: "SET_PLATFORM_DATA"; payload: Record<string, Train[]> }
   | {
       type: "UPDATE_TRAIN_STATUS";
-      payload: { trainNumber: string; status: Status }[];
+      payload: { trainNumber: string; status: Status; platformId: string }[];
     };

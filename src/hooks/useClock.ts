@@ -11,9 +11,9 @@ export default function useClock() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // Add 1 simulated second
+      // Add TIME_MULTIPLIER/10 simulated seconds (since we run every 100ms)
       currentTimeRef.current.setSeconds(
-        currentTimeRef.current.getSeconds() + 1
+        currentTimeRef.current.getSeconds() + TIME_MULTIPLIER
       );
       const newFormattedTime = formatTime(currentTimeRef.current);
 
@@ -22,7 +22,7 @@ export default function useClock() {
         lastTimeRef.current = newFormattedTime;
         setFormattedTime(newFormattedTime);
       }
-    }, 1000 / TIME_MULTIPLIER); // Run faster to simulate time progression
+    }, 100); // Run every 100ms, which is a reasonable interval
 
     return () => clearInterval(interval);
   }, []); // Empty deps array since we use refs for state
