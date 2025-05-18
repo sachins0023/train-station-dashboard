@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import { isLate } from "@/utils";
 import Status from "./Status";
 import { motion, AnimatePresence } from "motion/react";
+import { useTrainContext } from "@/context/TrainContext";
 
 const Platform = ({
   platformId,
@@ -11,6 +12,9 @@ const Platform = ({
   platformId: string;
   trains: Train[];
 }) => {
+  const { state } = useTrainContext();
+  const currentTime = state?.clockTime;
+
   const currentTrains = trains.filter((train) => train.status === "arrived");
   const upcomingTrains = trains.filter((train) => train.status === "scheduled");
 
@@ -18,8 +22,10 @@ const Platform = ({
     currentTrains[0]?.actualDeparture || currentTrains[0]?.scheduledDeparture;
 
   const delayedTrains = currentTrainDepartingTime
-    ? upcomingTrains.filter((train) =>
-        isLate(train.scheduledArrival, currentTrainDepartingTime)
+    ? upcomingTrains.filter(
+        (train) =>
+          isLate(train.scheduledArrival, currentTrainDepartingTime) &&
+          currentTime > train.scheduledArrival
       )
     : [];
 
@@ -53,7 +59,7 @@ const Platform = ({
                 <Status status={train.status} isLate={false} />
               </motion.div>
             ))}
-            {delayedTrains.length && (
+            {delayedTrains.length > 0 && (
               <p className="text-sm text-muted-foreground">Delayed</p>
             )}
             {delayedTrains.map((train) => (

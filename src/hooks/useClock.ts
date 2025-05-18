@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { formatTime } from "@/utils";
-import { TIME_MULTIPLIER } from "@/constants";
+import { TIME_MULTIPLIER, UPDATE_CLOCK } from "@/constants";
+import type { Dispatch } from "react";
+import type { TrainAction } from "@/types";
 
-export default function useClock(multiplier: number = TIME_MULTIPLIER) {
+export default function useClock(
+  multiplier: number = TIME_MULTIPLIER,
+  dispatch?: Dispatch<TrainAction>
+) {
   const [formattedTime, setFormattedTime] = useState(() =>
     formatTime(new Date(0, 0, 0, 10, 0))
   );
@@ -42,11 +47,15 @@ export default function useClock(multiplier: number = TIME_MULTIPLIER) {
       if (newFormattedTime !== lastTimeRef.current) {
         lastTimeRef.current = newFormattedTime;
         setFormattedTime(newFormattedTime);
+        // Dispatch clock update if dispatch function is provided
+        if (dispatch) {
+          dispatch({ type: UPDATE_CLOCK, payload: newFormattedTime });
+        }
       }
     }, 100);
 
     return () => clearInterval(interval);
-  }, []); // Empty deps array - interval never changes
+  }, [dispatch]); // Add dispatch to deps array
 
   return { time: formattedTime };
 }

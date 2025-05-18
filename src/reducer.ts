@@ -1,13 +1,25 @@
-import { SET_PLATFORM_DATA, UPDATE_TRAIN_STATUS } from "./constants";
-import type { Train, TrainAction } from "./types";
+import {
+  SET_PLATFORM_DATA,
+  UPDATE_TRAIN_STATUS,
+  UPDATE_CLOCK,
+} from "./constants";
+import type { Train, TrainAction, TrainState } from "./types";
+
+const initialState: TrainState = {
+  platformData: {},
+  clockTime: "10:00",
+};
 
 export const trainReducer = (
-  state: Record<string, Train[]>,
+  state: TrainState = initialState,
   action: TrainAction
-): Record<string, Train[]> => {
+): TrainState => {
   switch (action.type) {
     case SET_PLATFORM_DATA:
-      return action.payload;
+      return {
+        ...state,
+        platformData: action.payload,
+      };
     case UPDATE_TRAIN_STATUS: {
       const updatesMap = new Map(
         action.payload.map((u) => [
@@ -15,18 +27,30 @@ export const trainReducer = (
           u.status,
         ])
       );
-      return Object.entries(state).reduce((acc, [platformId, trains]) => {
-        acc[platformId] = trains.map((train) =>
-          updatesMap.has(`${train.trainNumber}-${platformId}`)
-            ? {
-                ...train,
-                status: updatesMap.get(`${train.trainNumber}-${platformId}`)!,
-              }
-            : train
-        );
-        return acc;
-      }, {} as Record<string, Train[]>);
+      const updatedPlatformData = Object.entries(state.platformData).reduce(
+        (acc, [platformId, trains]) => {
+          acc[platformId] = trains.map((train) =>
+            updatesMap.has(`${train.trainNumber}-${platformId}`)
+              ? {
+                  ...train,
+                  status: updatesMap.get(`${train.trainNumber}-${platformId}`)!,
+                }
+              : train
+          );
+          return acc;
+        },
+        {} as Record<string, Train[]>
+      );
+      return {
+        ...state,
+        platformData: updatedPlatformData,
+      };
     }
+    case UPDATE_CLOCK:
+      return {
+        ...state,
+        clockTime: action.payload,
+      };
     default:
       return state;
   }

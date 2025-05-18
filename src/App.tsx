@@ -1,21 +1,21 @@
-import { useCallback, useReducer, useState, useMemo } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { Toaster } from "sonner";
 import type { Train, TrainCSV } from "@/types";
 import LandingPage from "./pages/LandingPage";
 import TrainDashboard from "./pages/TrainDashboard";
 import { errorMessage } from "./utils";
-import { trainReducer } from "./reducer";
 import { setPlatformData } from "./actions";
 import { ArrowLeftIcon } from "lucide-react";
+import { TrainProvider, useTrainContext } from "./context/TrainContext";
 
-function App() {
+function TrainApp() {
   const [platformCount, setPlatformCount] = useState<string>("");
   const [showDashboard, setShowDashboard] = useState<boolean>(false);
-  const [platformData, dispatch] = useReducer(trainReducer, {});
+  const { state, dispatch } = useTrainContext();
 
   const trainData = useMemo(() => {
-    return Object.values(platformData).flat();
-  }, [platformData]);
+    return Object.values(state.platformData).flat();
+  }, [state.platformData]);
 
   const onUpload = useCallback(
     (data: TrainCSV[]) => {
@@ -68,7 +68,7 @@ function App() {
         );
       }
     },
-    [platformCount]
+    [platformCount, dispatch]
   );
 
   const onSubmit = useCallback(() => {
@@ -87,7 +87,7 @@ function App() {
     setPlatformCount("");
     setShowDashboard(false);
     dispatch(setPlatformData([], 0));
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="h-screen w-screen flex flex-col gap-4 items-center p-4">
@@ -109,15 +109,18 @@ function App() {
         />
       )}
       {showDashboard && (
-        <TrainDashboard
-          trainData={trainData}
-          platformData={platformData}
-          platformCount={platformCount}
-          dispatch={dispatch}
-        />
+        <TrainDashboard trainData={trainData} platformCount={platformCount} />
       )}
       <Toaster />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <TrainProvider>
+      <TrainApp />
+    </TrainProvider>
   );
 }
 

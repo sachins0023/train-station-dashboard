@@ -1,14 +1,13 @@
 import { useRef, useMemo } from "react";
 import { assignTrainsWithMinHeap } from "@/utils";
 import type { Train, Status } from "@/types";
-import useClock from "./useClock";
 
 // Helper to get all times between two HH:mm strings (inclusive)
 function getTimesBetween(start: string, end: string): string[] {
   const result = [];
   const [startH, startM] = start.split(":").map(Number);
   const [endH, endM] = end.split(":").map(Number);
-  let current = new Date(2000, 0, 1, startH, startM);
+  const current = new Date(2000, 0, 1, startH, startM);
   const endDate = new Date(2000, 0, 1, endH, endM);
   while (current <= endDate) {
     // Format as HH:mm
@@ -23,11 +22,11 @@ function getTimesBetween(start: string, end: string): string[] {
 const useTrainEvents = (
   trainData: Train[],
   platformCount: string,
-  timeMultiplier: number
+  timeMultiplier: number,
+  clockTime: string
 ) => {
-  const { time } = useClock(timeMultiplier);
   const processedEventsRef = useRef(new Set<string>());
-  const previousTimeRef = useRef<string>(time); // Track previous time
+  const previousTimeRef = useRef<string>(clockTime); // Track previous time
 
   const platformData = useMemo(() => {
     if (!platformCount || !trainData.length) return {};
@@ -75,7 +74,7 @@ const useTrainEvents = (
   // Collect all events between previousTimeRef and current time
   const currentEvents = useMemo(() => {
     const prev = previousTimeRef.current;
-    const curr = time;
+    const curr = clockTime;
     // If time went backwards (reset), just use current time
     let times: string[];
     if (prev <= curr) {
@@ -88,7 +87,7 @@ const useTrainEvents = (
     const events = times.flatMap((t) => eventMap[t] || []);
     previousTimeRef.current = curr;
     return events;
-  }, [time, eventMap]);
+  }, [clockTime, eventMap]);
 
   return { currentEvents, processedEventsRef, platformData };
 };

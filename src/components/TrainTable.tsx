@@ -59,7 +59,7 @@ const StyledTableCell = ({
 const EmptyTrainList = () => {
   return (
     <TableRow>
-      <TableCell colSpan={TRAIN_TABLE_HEADERS.length} className="h-24">
+      <TableCell colSpan={TRAIN_TABLE_HEADERS.length} className="h-24 border">
         <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
           No trains
         </div>
