@@ -70,8 +70,8 @@ export const assignTrainsWithMinHeap = (
 
   // Initialize platforms
   for (let i = 1; i <= platformCount; i++) {
-    const platform = {
-      platformId: i,
+    const platform: Platform = {
+      platformId: i.toString(),
       nextAvailable: new Date(2000, 0, 1, 0, 0),
       queue: [],
     };
@@ -112,7 +112,7 @@ export const assignTrainsWithMinHeap = (
   }
 
   // Format result
-  const result: Record<number, Train[]> = {};
+  const result: Record<string, Train[]> = {};
   for (const p of allPlatforms) {
     result[p.platformId] = p.queue;
   }
