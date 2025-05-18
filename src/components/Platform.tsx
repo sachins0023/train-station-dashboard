@@ -39,7 +39,24 @@ const Platform = ({
       <CardContent>
         <div className="flex flex-col gap-2">
           <AnimatePresence mode="popLayout">
-            {allTrains.map((train) => (
+            {currentTrains.map((train) => (
+              <motion.div
+                key={train.trainNumber}
+                variants={trainVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.5 }}
+                className="flex items-center gap-2"
+              >
+                {train.trainNumber}{" "}
+                <Status status={train.status} isLate={false} />
+              </motion.div>
+            ))}
+            {delayedTrains.length && (
+              <p className="text-sm text-muted-foreground">Delayed</p>
+            )}
+            {delayedTrains.map((train) => (
               <motion.div
                 key={train.trainNumber}
                 variants={trainVariants}

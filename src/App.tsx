@@ -1,49 +1,21 @@
-import { useCallback, useReducer, useState, useEffect, useMemo } from "react";
+import { useCallback, useReducer, useState, useMemo } from "react";
 import { Toaster } from "sonner";
-import useClock from "@/hooks/useClock";
 import type { Train, TrainCSV } from "@/types";
 import LandingPage from "./pages/LandingPage";
 import TrainDashboard from "./pages/TrainDashboard";
 import { errorMessage } from "./utils";
 import { trainReducer } from "./reducer";
-import useTrainEvents from "./hooks/useTrainEvents";
-import { setPlatformData, updateTrainStatus } from "./actions";
+import { setPlatformData } from "./actions";
+import { ArrowLeftIcon } from "lucide-react";
 
 function App() {
   const [platformCount, setPlatformCount] = useState<string>("");
   const [showDashboard, setShowDashboard] = useState<boolean>(false);
-
   const [platformData, dispatch] = useReducer(trainReducer, {});
 
   const trainData = useMemo(() => {
     return Object.values(platformData).flat();
   }, [platformData]);
-
-  const { currentEvents, processedEventsRef } = useTrainEvents(
-    trainData,
-    platformCount
-  );
-
-  const { time } = useClock();
-
-  useEffect(() => {
-    const newEvents = currentEvents.filter((event) => {
-      const eventKey = `${event.train.trainNumber}-${event.type}-${time}`;
-      if (processedEventsRef.current.has(eventKey)) {
-        return false;
-      }
-      processedEventsRef.current.add(eventKey);
-      return true;
-    });
-
-    if (newEvents.length > 0) {
-      dispatch(updateTrainStatus(newEvents));
-    }
-
-    if (processedEventsRef.current.size > 1000) {
-      processedEventsRef.current.clear();
-    }
-  }, [time, currentEvents, processedEventsRef]);
 
   const onUpload = useCallback(
     (data: TrainCSV[]) => {
@@ -111,12 +83,23 @@ function App() {
     setShowDashboard(true);
   }, [platformCount, trainData]);
 
-  console.log("App rerenders");
+  const reset = useCallback(() => {
+    setPlatformCount("");
+    setShowDashboard(false);
+    dispatch(setPlatformData([], 0));
+  }, []);
 
   return (
-    <div className="h-screen w-screen flex flex-col gap-4 items-center">
-      <h1 className="font-bold text-2xl">Train Scheduler</h1>
-      <p>Current time: {time}</p>
+    <div className="h-screen w-screen flex flex-col gap-4 items-center p-4">
+      <h1 className="font-bold text-2xl flex items-center gap-4">
+        {showDashboard && (
+          <ArrowLeftIcon
+            onClick={() => reset()}
+            className="w-12 h-12 cursor-pointer"
+          />
+        )}
+        Train Scheduler
+      </h1>
       {!showDashboard && (
         <LandingPage
           platformCount={platformCount}
@@ -126,7 +109,12 @@ function App() {
         />
       )}
       {showDashboard && (
-        <TrainDashboard trainData={trainData} platformData={platformData} />
+        <TrainDashboard
+          trainData={trainData}
+          platformData={platformData}
+          platformCount={platformCount}
+          dispatch={dispatch}
+        />
       )}
       <Toaster />
     </div>

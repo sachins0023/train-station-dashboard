@@ -3,9 +3,31 @@ import { assignTrainsWithMinHeap } from "@/utils";
 import type { Train, Status } from "@/types";
 import useClock from "./useClock";
 
-const useTrainEvents = (trainData: Train[], platformCount: string) => {
-  const { time } = useClock();
+// Helper to get all times between two HH:mm strings (inclusive)
+function getTimesBetween(start: string, end: string): string[] {
+  const result = [];
+  const [startH, startM] = start.split(":").map(Number);
+  const [endH, endM] = end.split(":").map(Number);
+  let current = new Date(2000, 0, 1, startH, startM);
+  const endDate = new Date(2000, 0, 1, endH, endM);
+  while (current <= endDate) {
+    // Format as HH:mm
+    const hh = String(current.getHours()).padStart(2, "0");
+    const mm = String(current.getMinutes()).padStart(2, "0");
+    result.push(`${hh}:${mm}`);
+    current.setMinutes(current.getMinutes() + 1);
+  }
+  return result;
+}
+
+const useTrainEvents = (
+  trainData: Train[],
+  platformCount: string,
+  timeMultiplier: number
+) => {
+  const { time } = useClock(timeMultiplier);
   const processedEventsRef = useRef(new Set<string>());
+  const previousTimeRef = useRef<string>(time); // Track previous time
 
   const platformData = useMemo(() => {
     if (!platformCount || !trainData.length) return {};
@@ -50,8 +72,22 @@ const useTrainEvents = (trainData: Train[], platformCount: string) => {
     }, {} as Record<string, { type: Status; train: Train; platformId: string }[]>);
   }, [platformData]);
 
+  // Collect all events between previousTimeRef and current time
   const currentEvents = useMemo(() => {
-    return eventMap[time] || [];
+    const prev = previousTimeRef.current;
+    const curr = time;
+    // If time went backwards (reset), just use current time
+    let times: string[];
+    if (prev <= curr) {
+      times = getTimesBetween(prev, curr);
+    } else {
+      // If clock reset (e.g. midnight), just use current time
+      times = [curr];
+    }
+    // Gather all events for these times
+    const events = times.flatMap((t) => eventMap[t] || []);
+    previousTimeRef.current = curr;
+    return events;
   }, [time, eventMap]);
 
   return { currentEvents, processedEventsRef, platformData };
