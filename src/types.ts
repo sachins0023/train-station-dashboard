@@ -23,7 +23,12 @@ export interface Platform {
 }
 
 export type TrainAction =
-  | { type: "SET_PLATFORM_DATA"; payload: Record<string, Train[]> }
+  | {
+      type: "SET_PLATFORM_DATA";
+      payload: Record<string, Train[]>;
+      minTime: string;
+      maxTime: string;
+    }
   | {
       type: "UPDATE_TRAIN_STATUS";
       payload: { trainNumber: string; status: Status; platformId: string }[];
@@ -33,4 +38,6 @@ export type TrainAction =
 export interface TrainState {
   platformData: Record<string, Train[]>;
   clockTime: string;
+  minTime?: string;
+  maxTime?: string;
 }

@@ -19,6 +19,8 @@ export const trainReducer = (
       return {
         ...state,
         platformData: action.payload,
+        minTime: action.minTime,
+        maxTime: action.maxTime,
       };
     case UPDATE_TRAIN_STATUS: {
       const updatesMap = new Map(

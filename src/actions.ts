@@ -8,7 +8,9 @@ import { assignTrainsWithMinHeap } from "./utils";
 
 export const setPlatformData = (
   trains: Train[],
-  platformCount: number
+  platformCount: number,
+  minTime: string,
+  maxTime: string
 ): TrainAction => {
   const platformData = assignTrainsWithMinHeap(trains, platformCount);
   // Convert platform numbers to strings
@@ -25,6 +27,8 @@ export const setPlatformData = (
   return {
     type: SET_PLATFORM_DATA,
     payload: stringPlatformData,
+    minTime,
+    maxTime,
   };
 };
 

@@ -59,12 +59,23 @@ export default function useClock(
 
       const newFormattedTime = formatTime(newTime);
 
+      // Only update and dispatch if the minute has changed
       if (newFormattedTime !== lastTimeRef.current) {
-        lastTimeRef.current = newFormattedTime;
-        setFormattedTime(newFormattedTime);
-        // Dispatch clock update if dispatch function is provided
-        if (dispatch) {
-          dispatch(updateClock(newFormattedTime));
+        const [oldHour, oldMin] = lastTimeRef.current.split(":").map(Number);
+        const [newHour, newMin] = newFormattedTime.split(":").map(Number);
+
+        // Check if minute has changed (accounting for hour changes)
+        const minuteChanged =
+          newHour !== oldHour || // Hour changed
+          newMin !== oldMin; // Minute changed
+
+        if (minuteChanged) {
+          lastTimeRef.current = newFormattedTime;
+          setFormattedTime(newFormattedTime);
+          // Dispatch clock update if dispatch function is provided
+          if (dispatch) {
+            dispatch(updateClock(newFormattedTime));
+          }
         }
       }
     }, 100);

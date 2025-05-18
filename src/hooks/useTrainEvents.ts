@@ -1,6 +1,7 @@
 import { useRef, useMemo } from "react";
-import { assignTrainsWithMinHeap } from "@/utils";
+// import { assignTrainsWithMinHeap } from "@/utils";
 import type { Train, Status } from "@/types";
+import { useTrainContext } from "@/context/TrainContext";
 
 // Helper to get all times between two HH:mm strings (inclusive)
 function getTimesBetween(start: string, end: string): string[] {
@@ -19,33 +20,14 @@ function getTimesBetween(start: string, end: string): string[] {
   return result;
 }
 
-const useTrainEvents = (
-  trainData: Train[],
-  platformCount: string,
-  timeMultiplier: number,
-  clockTime: string
-) => {
+const useTrainEvents = (clockTime: string) => {
+  const { state } = useTrainContext();
+  const platformData = state.platformData;
+  const minTime = state.minTime || "00:00";
+  const maxTime = state.maxTime || "23:59";
+
   const processedEventsRef = useRef(new Set<string>());
   const previousTimeRef = useRef<string>(clockTime); // Track previous time
-
-  const platformData = useMemo(() => {
-    if (!platformCount || !trainData.length) return {};
-    const numericPlatformData = assignTrainsWithMinHeap(
-      trainData,
-      Number(platformCount)
-    );
-    // Convert platform numbers to strings
-    return Object.entries(numericPlatformData).reduce(
-      (acc, [platformId, trains]) => {
-        acc[platformId] = trains.map((train) => ({
-          ...train,
-          platformId: platformId,
-        }));
-        return acc;
-      },
-      {} as Record<string, Train[]>
-    );
-  }, [trainData, platformCount]);
 
   const eventMap = useMemo(() => {
     return Object.entries(platformData).reduce((acc, [platformId, trains]) => {
@@ -71,10 +53,28 @@ const useTrainEvents = (
     }, {} as Record<string, { type: Status; train: Train; platformId: string }[]>);
   }, [platformData]);
 
+  // const allTrains = useMemo(() => Object.values(platformData).flat(), [platformData]);
+
   // Collect all events between previousTimeRef and current time
   const currentEvents = useMemo(() => {
     const prev = previousTimeRef.current;
     const curr = clockTime;
+
+    // Restrict event processing to the event window
+    if (curr < minTime || curr > maxTime) {
+      previousTimeRef.current = curr;
+      return [];
+    }
+
+    // Only process if minute has changed
+    const [prevHour, prevMin] = prev.split(":").map(Number);
+    const [currHour, currMin] = curr.split(":").map(Number);
+    const minuteChanged = currHour !== prevHour || currMin !== prevMin;
+
+    if (!minuteChanged) {
+      return [];
+    }
+
     // If time went backwards (reset), just use current time
     let times: string[];
     if (prev <= curr) {
@@ -87,7 +87,7 @@ const useTrainEvents = (
     const events = times.flatMap((t) => eventMap[t] || []);
     previousTimeRef.current = curr;
     return events;
-  }, [clockTime, eventMap]);
+  }, [clockTime, eventMap, minTime, maxTime]);
 
   return { currentEvents, processedEventsRef, platformData };
 };

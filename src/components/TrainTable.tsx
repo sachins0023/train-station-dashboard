@@ -72,6 +72,7 @@ const TrainTable = ({ trains }: { trains: Train[] }) => {
   return (
     <Table>
       <TableHeader>
+        <TableHead className="text-center border w-10">S.No</TableHead>
         {TRAIN_TABLE_HEADERS.map((header) => (
           <TableHead key={header} className="text-center border">
             {header}
@@ -80,8 +81,11 @@ const TrainTable = ({ trains }: { trains: Train[] }) => {
       </TableHeader>
       <TableBody className="w-full h-full">
         {trains.length ? (
-          trains.map((train) => (
+          trains.map((train, index) => (
             <TableRow key={train.trainNumber}>
+              <TableCell className="text-center border w-10">
+                {index + 1}
+              </TableCell>
               {TRAIN_TABLE_HEADERS.map((header) => (
                 <StyledTableCell key={header} header={header} train={train} />
               ))}

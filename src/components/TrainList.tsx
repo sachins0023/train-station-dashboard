@@ -7,7 +7,11 @@ import { useTrainContext } from "@/context/TrainContext";
 const TrainList = ({ data }: { data: Train[] }) => {
   const { state } = useTrainContext();
   const currentTime = state?.clockTime;
-  const upcomingTrains = data.filter((train) => train.status === "scheduled");
+  const upcomingTrains = data.filter(
+    (train) =>
+      train.status === "scheduled" &&
+      !isLate(train.scheduledArrival, currentTime)
+  );
   const trainsOnPlatform = data.filter((train) => train.status === "arrived");
   const departedTrains = data.filter((train) => train.status === "departed");
   const delayedTrains = data.filter(

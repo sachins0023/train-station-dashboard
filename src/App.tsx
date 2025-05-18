@@ -4,9 +4,11 @@ import type { Train, TrainCSV } from "@/types";
 import LandingPage from "./pages/LandingPage";
 import TrainDashboard from "./pages/TrainDashboard";
 import { errorMessage } from "./utils";
-import { setPlatformData } from "./actions";
-import { ArrowLeftIcon } from "lucide-react";
+import { setPlatformData, updateClock } from "./actions";
+import { X } from "lucide-react";
 import { TrainProvider, useTrainContext } from "./context/TrainContext";
+import { INITIAL_CLOCK_TIME } from "./constants";
+import { assignTrainsWithMinHeap } from "@/utils";
 
 function TrainApp() {
   const [platformCount, setPlatformCount] = useState<string>("");
@@ -63,7 +65,30 @@ function TrainApp() {
       return;
     }
     try {
-      dispatch(setPlatformData(uploadedFileData as Train[], platformCountNum));
+      // Calculate minTime (earliest scheduledArrival)
+      const minTime = uploadedFileData.reduce(
+        (min, t) => (t.scheduledArrival < min ? t.scheduledArrival : min),
+        "23:59"
+      );
+      // Assign platforms and get all trains with actualDeparture
+      const platformData = assignTrainsWithMinHeap(
+        uploadedFileData as Train[],
+        platformCountNum
+      );
+      const allTrains: Train[] = Object.values(platformData).flat();
+      // Calculate maxTime (latest actualDeparture)
+      const maxTime = allTrains.reduce(
+        (max, t) => (t.actualDeparture > max ? t.actualDeparture : max),
+        "00:00"
+      );
+      dispatch(
+        setPlatformData(
+          uploadedFileData as Train[],
+          platformCountNum,
+          minTime,
+          maxTime
+        )
+      );
     } catch (error) {
       errorMessage(
         `Failed to assign platforms: ${
@@ -77,16 +102,17 @@ function TrainApp() {
   const reset = useCallback(() => {
     setPlatformCount("");
     setShowDashboard(false);
-    dispatch(setPlatformData([], 0));
+    dispatch(setPlatformData([], 0, "00:00", "23:59"));
+    dispatch(updateClock(INITIAL_CLOCK_TIME));
   }, [dispatch]);
 
   return (
     <div className="h-screen w-screen flex flex-col overflow-hidden">
       <div className="flex p-4 gap-4">
         {showDashboard && (
-          <ArrowLeftIcon
+          <X
             onClick={() => reset()}
-            className="w-8 h-8 cursor-pointer"
+            className="w-8 h-8 cursor-pointer text-red-800 hover:text-red-600"
           />
         )}
         <div className="font-bold text-2xl items-center flex-1 text-center">
@@ -102,9 +128,7 @@ function TrainApp() {
             onSubmit={onSubmit}
           />
         )}
-        {showDashboard && (
-          <TrainDashboard trainData={trainData} platformCount={platformCount} />
-        )}
+        {showDashboard && <TrainDashboard trainData={trainData} />}
       </div>
       <Toaster />
     </div>

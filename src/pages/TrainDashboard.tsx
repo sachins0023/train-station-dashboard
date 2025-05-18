@@ -8,25 +8,16 @@ import useClock from "@/hooks/useClock";
 import useTrainEvents from "@/hooks/useTrainEvents";
 import { useTrainContext } from "@/context/TrainContext";
 
-const TrainDashboard = ({
-  trainData,
-  platformCount,
-}: {
-  trainData: Train[];
-  platformCount: string;
-}) => {
+const TrainDashboard = ({ trainData }: { trainData: Train[] }) => {
   const { state, dispatch } = useTrainContext();
   const [timeMultiplier, setTimeMultiplier] = useState<number>(1);
 
   // Use the clock time from the reducer
   useClock(timeMultiplier, dispatch);
 
-  const { currentEvents, processedEventsRef } = useTrainEvents(
-    trainData,
-    platformCount,
-    timeMultiplier,
-    state.clockTime
-  );
+  const { currentEvents, processedEventsRef } = useTrainEvents(state.clockTime);
+
+  console.log({ currentEvents });
 
   useEffect(() => {
     const newEvents = currentEvents.filter((event) => {
@@ -42,7 +33,7 @@ const TrainDashboard = ({
       dispatch(updateTrainStatus(newEvents));
     }
 
-    if (processedEventsRef.current.size > 1000) {
+    if (processedEventsRef.current.size > 10000) {
       processedEventsRef.current.clear();
     }
   }, [state.clockTime, currentEvents, processedEventsRef, dispatch]);
