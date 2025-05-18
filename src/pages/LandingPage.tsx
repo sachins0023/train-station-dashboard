@@ -2,7 +2,7 @@ import PlatformInput from "@/components/PlatformInput";
 import { Button } from "@/components/ui/button";
 import Upload from "@/components/Upload";
 import type { TrainCSV } from "@/types";
-import { Download, DownloadIcon } from "lucide-react";
+import { DownloadIcon } from "lucide-react";
 
 const LandingPage = ({
   platformCount,
