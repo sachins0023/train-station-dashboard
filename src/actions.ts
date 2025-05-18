@@ -1,4 +1,8 @@
-import { SET_PLATFORM_DATA, UPDATE_TRAIN_STATUS } from "./constants";
+import {
+  SET_PLATFORM_DATA,
+  UPDATE_CLOCK,
+  UPDATE_TRAIN_STATUS,
+} from "./constants";
 import type { Status, Train, TrainAction } from "./types";
 import { assignTrainsWithMinHeap } from "./utils";
 
@@ -37,4 +41,9 @@ export const updateTrainStatus = (
     status: event.type,
     platformId: event.platformId,
   })),
+});
+
+export const updateClock = (time: string): TrainAction => ({
+  type: UPDATE_CLOCK,
+  payload: time,
 });

@@ -4,7 +4,7 @@ import Platform from "./Platform";
 
 const PlatformList = ({ data }: { data: Record<string, Train[]> }) => {
   return (
-    <Card>
+    <Card className="flex-1 h-full overflow-y-auto">
       <CardHeader>
         <CardTitle>Platform List</CardTitle>
       </CardHeader>

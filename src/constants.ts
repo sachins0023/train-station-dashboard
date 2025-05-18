@@ -14,6 +14,7 @@ export const TRAIN_CSV_HEADERS = [
 
 export const TRAIN_TABLE_HEADERS = [
   "Train Number",
+  "Priority",
   "Scheduled Arrival",
   "Actual Arrival",
   "Scheduled Departure",
@@ -24,6 +25,7 @@ export const TRAIN_TABLE_HEADERS = [
 
 export const TABLE_HEADERS_KEY_MAP = {
   "Train Number": "trainNumber",
+  Priority: "priority",
   "Scheduled Arrival": "scheduledArrival",
   "Actual Arrival": "actualArrival",
   "Scheduled Departure": "scheduledDeparture",

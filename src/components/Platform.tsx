@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import { isLate } from "@/utils";
 import Status from "./Status";
 import { motion, AnimatePresence } from "motion/react";
-import { useTrainContext } from "@/context/TrainContext";
+// import { useTrainContext } from "@/context/TrainContext";
 
 const Platform = ({
   platformId,
@@ -12,8 +12,8 @@ const Platform = ({
   platformId: string;
   trains: Train[];
 }) => {
-  const { state } = useTrainContext();
-  const currentTime = state?.clockTime;
+  // const { state } = useTrainContext();
+  // const currentTime = state?.clockTime;
 
   const currentTrains = trains.filter((train) => train.status === "arrived");
   const upcomingTrains = trains.filter((train) => train.status === "scheduled");
@@ -23,16 +23,22 @@ const Platform = ({
 
   const delayedTrains = currentTrainDepartingTime
     ? upcomingTrains.filter(
-        (train) =>
-          isLate(train.scheduledArrival, currentTrainDepartingTime) &&
-          currentTime > train.scheduledArrival
+        (train) => isLate(train.scheduledArrival, currentTrainDepartingTime)
+        // &&
+        // currentTime > train.scheduledArrival
       )
     : [];
 
-  const trainVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
+  const currentTrainVariants = {
+    initial: { opacity: 0, x: -50 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 50, transition: { duration: 1 } },
+  };
+
+  const delayedTrainVariants = {
+    initial: { opacity: 0, x: -50 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, y: -50, transition: { duration: 1 } },
   };
 
   const allTrains = [...currentTrains, ...delayedTrains];
@@ -48,28 +54,36 @@ const Platform = ({
             {currentTrains.map((train) => (
               <motion.div
                 key={train.trainNumber}
-                variants={trainVariants}
+                variants={currentTrainVariants}
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 1 }}
                 className="flex items-center gap-2"
               >
                 {train.trainNumber}{" "}
-                <Status status={train.status} isLate={false} />
+                <Status
+                  status={train.status}
+                  isLate={isLate(
+                    train.scheduledArrival,
+                    currentTrainDepartingTime
+                  )}
+                />
               </motion.div>
             ))}
-            {delayedTrains.length > 0 && (
-              <p className="text-sm text-muted-foreground">Delayed</p>
-            )}
+          </AnimatePresence>
+          {delayedTrains.length > 0 && (
+            <p className="text-sm text-muted-foreground">Delayed</p>
+          )}
+          <AnimatePresence mode="popLayout">
             {delayedTrains.map((train) => (
               <motion.div
                 key={train.trainNumber}
-                variants={trainVariants}
+                variants={delayedTrainVariants}
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 1 }}
                 className="flex items-center gap-2"
               >
                 {train.trainNumber}{" "}

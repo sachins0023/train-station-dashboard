@@ -1,15 +1,24 @@
 import { useState, useEffect, useRef } from "react";
 import { formatTime } from "@/utils";
-import { TIME_MULTIPLIER, UPDATE_CLOCK } from "@/constants";
+import { TIME_MULTIPLIER, INITIAL_CLOCK_TIME } from "@/constants";
 import type { Dispatch } from "react";
 import type { TrainAction } from "@/types";
+import { updateClock } from "@/actions";
 
 export default function useClock(
   multiplier: number = TIME_MULTIPLIER,
   dispatch?: Dispatch<TrainAction>
 ) {
   const [formattedTime, setFormattedTime] = useState(() =>
-    formatTime(new Date(0, 0, 0, 10, 0))
+    formatTime(
+      new Date(
+        0,
+        0,
+        0,
+        Number(INITIAL_CLOCK_TIME.split(":")[0]),
+        Number(INITIAL_CLOCK_TIME.split(":")[1])
+      )
+    )
   );
   const lastTimeRef = useRef(formattedTime);
   const totalSecondsRef = useRef(0);
@@ -39,7 +48,13 @@ export default function useClock(
       totalSecondsRef.current += limitedSimulatedSeconds;
 
       // Create time from total seconds
-      const newTime = new Date(0, 0, 0, 10, 0);
+      const newTime = new Date(
+        0,
+        0,
+        0,
+        Number(INITIAL_CLOCK_TIME.split(":")[0]),
+        Number(INITIAL_CLOCK_TIME.split(":")[1])
+      );
       newTime.setSeconds(Math.floor(totalSecondsRef.current));
 
       const newFormattedTime = formatTime(newTime);
@@ -49,7 +64,7 @@ export default function useClock(
         setFormattedTime(newFormattedTime);
         // Dispatch clock update if dispatch function is provided
         if (dispatch) {
-          dispatch({ type: UPDATE_CLOCK, payload: newFormattedTime });
+          dispatch(updateClock(newFormattedTime));
         }
       }
     }, 100);

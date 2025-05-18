@@ -90,27 +90,31 @@ function TrainApp() {
   }, [dispatch]);
 
   return (
-    <div className="h-screen w-screen flex flex-col gap-4 items-center p-4">
-      <h1 className="font-bold text-2xl flex items-center gap-4">
+    <div className="h-screen w-screen flex flex-col overflow-hidden">
+      <div className="flex p-4 gap-4">
         {showDashboard && (
           <ArrowLeftIcon
             onClick={() => reset()}
-            className="w-12 h-12 cursor-pointer"
+            className="w-8 h-8 cursor-pointer"
           />
         )}
-        Train Scheduler
-      </h1>
-      {!showDashboard && (
-        <LandingPage
-          platformCount={platformCount}
-          setPlatformCount={setPlatformCount}
-          onUpload={onUpload}
-          onSubmit={onSubmit}
-        />
-      )}
-      {showDashboard && (
-        <TrainDashboard trainData={trainData} platformCount={platformCount} />
-      )}
+        <div className="font-bold text-2xl items-center flex-1 text-center">
+          Train Scheduler
+        </div>
+      </div>
+      <div className="flex-1 w-full overflow-auto px-4 pb-4">
+        {!showDashboard && (
+          <LandingPage
+            platformCount={platformCount}
+            setPlatformCount={setPlatformCount}
+            onUpload={onUpload}
+            onSubmit={onSubmit}
+          />
+        )}
+        {showDashboard && (
+          <TrainDashboard trainData={trainData} platformCount={platformCount} />
+        )}
+      </div>
       <Toaster />
     </div>
   );

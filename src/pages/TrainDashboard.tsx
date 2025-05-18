@@ -56,8 +56,8 @@ const TrainDashboard = ({
   }, [state.platformData]);
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col items-center gap-4 w-full h-full">
+      <div className="flex items-center gap-2 shrink-0">
         <p>Clock: {state.clockTime}</p>
         <Slider
           min={1}
@@ -70,7 +70,7 @@ const TrainDashboard = ({
         />
         <p>{timeMultiplier}x</p>
       </div>
-      <div className="flex">
+      <div className="flex gap-4 w-full flex-1 min-h-0">
         {renderTrainList}
         {renderPlatformList}
       </div>
