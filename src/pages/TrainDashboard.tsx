@@ -17,8 +17,6 @@ const TrainDashboard = ({ trainData }: { trainData: Train[] }) => {
 
   const { currentEvents, processedEventsRef } = useTrainEvents(state.clockTime);
 
-  console.log({ currentEvents });
-
   useEffect(() => {
     const newEvents = currentEvents.filter((event) => {
       const eventKey = `${event.train.trainNumber}-${event.type}-${state.clockTime}`;
